@@ -1,0 +1,10 @@
+.footer {
+    background-color: transparent; /* Set background to transparent */
+    color: white; /* Keep text color if needed */
+    padding: 5px; /* Adjust padding as necessary */
+    text-align: center; /* Center text */
+    position: fixed; /* Ensure it stays at the bottom */
+    width: 100%; /* Full width */
+    bottom: 0; /* Stick to the bottom */
+    border-top: none; /* Remove any border if present */
+}

@@ -1,0 +1,98 @@
+
+.landing-page {
+  font-family: Tahoma, sans-serif; /* Changed font to Tahoma */
+  padding: 0px;
+  transition: background-color 0.3s, color 0.3s;
+  /* Override with !important if necessary */
+}
+
+.light-mode {
+  background-color: white;
+  color: black;
+}
+
+.dark-mode {
+  background-color: #2a2929;
+  color: white;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.chat-container {
+  margin-top: 2rem;
+}
+
+.chat-container .MuiPaper-root {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.dark-mode .chat-container .MuiPaper-root {
+  background-color: rgba(120, 124, 137, 0.949);
+}
+
+.MuiButton-root {
+  background-color: #4285F4;
+  color: white;
+}
+
+.MuiButton-root:hover {
+  background-color: #3367D6;
+}
+
+.MuiAvatar-root {
+  margin-right: 8px;
+}
+
+/* Ensure user text messages are visible in light mode */
+.light-mode .MuiPaper-root {
+  color: black !important; /* Ensure text color is black for all messages */
+}
+
+/* Additional styles for user messages specifically */
+.light-mode .chat-message.user .MuiPaper-root {
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+  color: black !important; /* Ensure user text color is black */
+}
+
+/* Ensure all chat messages are visible in light mode */
+.light-mode .chat-message .MuiPaper-root {
+  background-color: rgba(225, 224, 224, 0.9); /* Slightly transparent white */
+  color: black !important; /* Ensure text color is black */
+}
+
+/* Add styles for user text input in light mode */
+.light-mode .chat-container input {
+  background-color: rgb(255, 255, 255); /* Ensure input background is white */
+  color: black; /* Ensure text color is black for visibility */
+  border: 1px solid #ccc; /* Optional: Add a border for better visibility */
+}
+
+/* Ensure section text is visible in dark mode */
+.dark-mode .section-text {
+  color: white; /* Change text color to white */
+  border-radius: 8px; /* Match light mode shape */
+  background-color: rgba(42, 42, 42, 0.8); /* Optional: Add a background for better visibility */
+}
+
+/* Change shape to match light mode */
+.light-mode .section-text {
+  border-radius: 8px; /* Example: Add border radius for rounded corners */
+  background-color: rgba(255, 255, 255, 0.9); /* Light background for visibility */
+}
+
+/* Additional styles for responsiveness */
+@media (max-width: 100px) {
+  .main-content {
+    padding:100%;
+  }
+}
+
