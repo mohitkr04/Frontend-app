@@ -9,3 +9,7 @@ Currently, two official plugins are available:
 1. Create/Check docker file.
 2. Build docker image : docker build -t base-frontend .
 3. Run the docker cointainer : docker run -p 3000:3000 base-frontend
+
+4. install vite extension inside vs code
+5. install node.js 
+6. run the froned with command: npm run dev
