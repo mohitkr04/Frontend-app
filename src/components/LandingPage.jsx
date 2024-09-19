@@ -27,18 +27,16 @@ function LandingPage() {
   };
 
   const fetchAIResponse = async (userInput) => {
-    // const apiKey = 'asst_xF5jsU62Nbitv20IvLz9tkKW'; // Your provided API key
-    // const model = 'gpt2'; // You can choose any model available on the API
-
     try {
-      const response = await axios.get(`http://localhost:8000/search?query="${userInput}"`); // Updated API URL
-      return response.data; // Adjust based on the API response structure
+      console.log('Sending request to API...');
+      const response = await axios.get(`http://localhost:8000/search?query="${userInput}"`);
+      console.log('Received response:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching AI response:', error);
-      return "Sorry, I couldn't generate a response.";
+      return "Sorry, I couldn't generate a response." + error.message;
     }
   };
-
   const handleSend = async () => {
     if (input.trim()) {
       setIsChatVisible(true);
@@ -280,20 +278,28 @@ function LandingPage() {
             {isChatVisible && (
               <Paper elevation={3} sx={{ 
                 padding: 2, 
-                overflowY: 'visible', 
+                overflowY: 'auto', // Change to 'auto' to add scrollbar when needed
                 backgroundColor: isDarkMode ? '#1e1e1e' : '#f5f5f5', 
                 borderRadius: '20px', 
                 flexGrow: 1, 
+                maxHeight: '60vh', // Set a maximum height, adjust as needed
+                height: 'auto',
+                marginBottom: '20px', // Add some space at the bottom
               }}>
                 <List>
                   {messages.map((message, index) => (
-                    <ListItem key={index} sx={{ justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <ListItem key={index} sx={{ 
+                      justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
+                      alignItems: 'flex-start', // Align items to the top
+                    }}>
                       {message.sender === 'ai' && <AIAvatar />}
                       <Paper sx={{ 
-                        padding: 1, 
+                        padding: 2, 
                         borderRadius: 2, 
                         backgroundColor: message.sender === 'user' ? 'primary.main' : (message.isThinking ? 'grey.400' : (isDarkMode ? '#424242' : '#e0e0e0')), 
-                        color: message.sender === 'user' ? 'white' : (isDarkMode ? 'white' : 'black') 
+                        color: message.sender === 'user' ? 'white' : (isDarkMode ? 'white' : 'black'),
+                        maxWidth: '80%', // Limit the width of message bubbles
+                        wordBreak: 'break-word', // Allow long words to break
                       }}>
                         {message.text}
                       </Paper>
