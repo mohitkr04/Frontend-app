@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Typography, Switch, FormControlLabel, TextField, Button, Paper, List, ListItem, CircularProgress, Avatar, AppBar, Toolbar, Button as MuiButton, IconButton } from '@mui/material';
+import { Typography, Switch, FormControlLabel, TextField, Button, Paper, List, ListItem, CircularProgress, Avatar, AppBar, Toolbar, Button as MuiButton, IconButton, Link, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import GavelIcon from '@mui/icons-material/Gavel'; // Import Law Icon
 import MicIcon from '@mui/icons-material/Mic'; // Import Mic Icon
@@ -21,6 +21,10 @@ function LandingPage() {
   const messagesEndRef = useRef(null);
   const [showQuestions, setShowQuestions] = useState(false); // State to toggle question visibility
   const [currentQuestion, setCurrentQuestion] = useState(null); // State to track the current question
+  const [aiResponseLength, setAiResponseLength] = useState(0);
+  const [topMatches, setTopMatches] = useState([]); 
+  const [selectedContent, setSelectedContent] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -28,15 +32,24 @@ function LandingPage() {
 
   const fetchAIResponse = async (userInput) => {
     try {
-      console.log('Sending request to API...');
-      const response = await axios.get(`http://localhost:8000/search?query="${userInput}"`);
-      console.log('Received response:', response.data);
-      return response.data;
+    console.log('Sending request to API...');
+    const response = await axios.get(`http://localhost:8000/search?query=${encodeURIComponent(userInput)}`);
+    console.log('Received response:', response.data);
+
+    // Extract 'summarized_answer' and 'top_matches'
+    const aiResponse = response.data.summarized_answer || "Sorry, I couldn't generate a response.";
+    const matches = response.data.top_matches || [];
+
+    setAiResponseLength(aiResponse.length);
+    setTopMatches(matches); // Update the 'topMatches' state
+    return aiResponse;
     } catch (error) {
       console.error('Error fetching AI response:', error);
-      return "Sorry, I couldn't generate a response." + error.message;
+      // Include the error message in the response
+      return `Sorry, I couldn't generate a response due to an error: ${error.message}. ${error.response ? `Status: ${error.response.status}, Data: ${JSON.stringify(error.response.data)}` : ''}`;
     }
   };
+
   const handleSend = async () => {
     if (input.trim()) {
       setIsChatVisible(true);
@@ -88,6 +101,15 @@ function LandingPage() {
 
   const handleQuestionClick = (question) => {
     setCurrentQuestion(question); // Set the current question to show its suggestions
+  };
+
+  const handleMatchClick = (match) => {
+    setSelectedContent(match);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   useEffect(() => {
@@ -282,7 +304,7 @@ function LandingPage() {
                 backgroundColor: isDarkMode ? '#1e1e1e' : '#f5f5f5', 
                 borderRadius: '20px', 
                 flexGrow: 1, 
-                maxHeight: '60vh', // Set a maximum height, adjust as needed
+                maxHeight: `${Math.min(60 + aiResponseLength * 0.1, 80)}vh`, // Adjust max height based on AI response length
                 height: 'auto',
                 marginBottom: '20px', // Add some space at the bottom
               }}>
@@ -298,7 +320,7 @@ function LandingPage() {
                         borderRadius: 2, 
                         backgroundColor: message.sender === 'user' ? 'primary.main' : (message.isThinking ? 'grey.400' : (isDarkMode ? '#424242' : '#e0e0e0')), 
                         color: message.sender === 'user' ? 'white' : (isDarkMode ? 'white' : 'black'),
-                        maxWidth: '80%', // Limit the width of message bubbles
+                        maxWidth: message.sender === 'ai' ? '90%' : '80%', // Increase max width for AI responses
                         wordBreak: 'break-word', // Allow long words to break
                       }}>
                         {message.text}
@@ -311,6 +333,35 @@ function LandingPage() {
                     </ListItem>
                   )}
                 </List>
+                {topMatches.length > 0 && (
+                  <div style={{marginTop: '16px'}}> 
+                    <Typography variant="h6" sx={{ mt: 1 }}>Top Matches:</Typography>
+                    <List>
+                      {topMatches.map((match, index) => (
+                        <ListItem key={index} sx={{
+                          backgroundColor: isDarkMode ? '#212121' : '#f5f5f5', 
+                          marginBottom: '8px',
+                          borderRadius: '4px'
+                        }}>
+                          <Link
+                            component="button"
+                            variant="body2"
+                            onClick={() => handleMatchClick(match)}
+                            sx={{
+                              color: isDarkMode ? '#90caf9' : '#1976d2',
+                              textDecoration: 'none',
+                              '&:hover': {
+                                textDecoration: 'underline',
+                              },
+                            }}
+                          >
+                            {match.page_content.substring(0, 200)}...
+                          </Link>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </Paper>
             )}
@@ -410,6 +461,23 @@ function LandingPage() {
         </div>
       </div>
       
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        scroll="paper"
+        aria-labelledby="scroll-dialog-title"
+        aria-describedby="scroll-dialog-description"
+      >
+        <DialogTitle id="scroll-dialog-title">Full Content</DialogTitle>
+        <DialogContent dividers={true}>
+          <Typography>
+            {selectedContent?.page_content}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
