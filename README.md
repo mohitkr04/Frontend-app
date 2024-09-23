@@ -14,23 +14,25 @@ Currently, two official plugins are available:
 
 ## Installation
 
+```bash
 git clone https://github.com/mohitkr04/Frontend-app.git
 cd Frontend-app
 npm install
 npm run dev
+```
 
-# Docker Setup
+## Docker Setup
 
 To run the application using Docker:
 
 1. Build the Docker image:
    
-   docker build -t frontend-app .
+   ```docker build -t Frontend-app .```
    
 
 2. Run the Docker container:
    
-   docker run -p 3000:3000 frontend-app
+   ```docker run -p 3000:3000 Frontend-app```
    
 
 This will start the application in a Docker container, accessible at http://localhost:3000.
