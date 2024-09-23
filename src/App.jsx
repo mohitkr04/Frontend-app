@@ -4,7 +4,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import LandingPage from './components/LandingPage';
 import SearchPage from './components/SearchPage';
 import Footer from './components/Footer'; // New import
-import HamburgerMenu from './components/HamburgerMenu';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -46,7 +45,6 @@ function App() {
   return (
     <ThemeProvider theme={currentPage === 'landing' ? landingTheme : searchTheme}>
       <CssBaseline />
-      <HamburgerMenu />
       {currentPage === 'landing' ? (
         <LandingPage 
           onExplore={handleExplore} 

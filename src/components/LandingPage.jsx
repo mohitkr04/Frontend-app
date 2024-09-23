@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Typography, Switch, FormControlLabel, TextField, Button, Paper, List, ListItem, CircularProgress, Avatar, AppBar, Toolbar, Button as MuiButton, IconButton, Link, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Typography, Switch, FormControlLabel, TextField, Button, Paper, List, ListItem, CircularProgress, Avatar, AppBar, Toolbar, 
+  IconButton, Link, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import GavelIcon from '@mui/icons-material/Gavel'; // Import Law Icon
 import MicIcon from '@mui/icons-material/Mic'; // Import Mic Icon
@@ -25,6 +26,7 @@ function LandingPage() {
   const [topMatches, setTopMatches] = useState([]); 
   const [selectedContent, setSelectedContent] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const chatContainerRef = useRef(null); // Reference for the chat container
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -32,17 +34,17 @@ function LandingPage() {
 
   const fetchAIResponse = async (userInput) => {
     try {
-    console.log('Sending request to API...');
-    const response = await axios.get(`http://localhost:8000/search?query=${encodeURIComponent(userInput)}`);
-    console.log('Received response:', response.data);
+      console.log('Sending request to API...');
+      const response = await axios.get(`http://localhost:8000/search?query=${encodeURIComponent(userInput)}`);
+      console.log('Received response:', response.data);
 
-    // Extract 'summarized_answer' and 'top_matches'
-    const aiResponse = response.data.summarized_answer || "Sorry, I couldn't generate a response.";
-    const matches = response.data.top_matches || [];
+      // Extract 'summarized_answer' and 'top_matches'
+      const aiResponse = response.data.summarized_answer || "Sorry, I couldn't generate a response.";
+      const matches = response.data.top_matches || [];
 
-    setAiResponseLength(aiResponse.length);
-    setTopMatches(matches); // Update the 'topMatches' state
-    return aiResponse;
+      setAiResponseLength(aiResponse.length);
+      setTopMatches(matches); // Update the 'topMatches' state
+      return aiResponse;
     } catch (error) {
       console.error('Error fetching AI response:', error);
       // Include the error message in the response
@@ -113,7 +115,16 @@ function LandingPage() {
   };
 
   useEffect(() => {
+    // Scroll to bottom of the chat container
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    // Dynamically adjust chat container height
+    if (chatContainerRef.current) {
+      chatContainerRef.current.style.height = 'auto';
+      chatContainerRef.current.style.height = `${chatContainerRef.current.scrollHeight}px`;
+    }
   }, [messages]);
 
   return (
@@ -236,7 +247,7 @@ function LandingPage() {
           <Typography variant="h4" component="h2" gutterBottom sx={{ color: isDarkMode ? 'white' : 'black' }}>
             Where Knowledge Meets Justice
           </Typography>
-          <div className="chat-container" sx={{ marginBottom: '1rem', backgroundColor: 'transparent', display: 'flex', flexDirection: 'column' }}>
+          <div className="chat-container" ref={chatContainerRef} sx={{ marginBottom: '1rem', backgroundColor: 'transparent', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', marginBottom: '1rem', alignItems: 'center' }}>
               <TextField
                 variant="outlined"
@@ -300,15 +311,17 @@ function LandingPage() {
             {isChatVisible && (
               <Paper elevation={3} sx={{ 
                 padding: 2, 
-                overflowY: 'auto', // Change to 'auto' to add scrollbar when needed
                 backgroundColor: isDarkMode ? '#1e1e1e' : '#f5f5f5', 
                 borderRadius: '20px', 
                 flexGrow: 1, 
-                maxHeight: `${Math.min(60 + aiResponseLength * 0.1, 80)}vh`, // Adjust max height based on AI response length
-                height: 'auto',
                 marginBottom: '20px', // Add some space at the bottom
               }}>
-                <List>
+                <List sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  maxHeight: '100%',
+                  overflowY: 'auto', // Removed 'hidden' to enable scrollbar
+                }}>
                   {messages.map((message, index) => (
                     <ListItem key={index} sx={{ 
                       justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
@@ -338,11 +351,12 @@ function LandingPage() {
                     <Typography variant="h6" sx={{ mt: 1 }}>Top Matches:</Typography>
                     <List>
                       {topMatches.map((match, index) => (
-                        <ListItem key={index} sx={{
-                          backgroundColor: isDarkMode ? '#212121' : '#f5f5f5', 
-                          marginBottom: '8px',
-                          borderRadius: '4px'
-                        }}>
+                        <ListItem key={index} 
+                          sx={{
+                            backgroundColor: 'transparent', // Set background to transparent
+                            marginBottom: '8px',
+                            borderRadius: '4px'
+                          }}>
                           <Link
                             component="button"
                             variant="body2"
@@ -467,8 +481,46 @@ function LandingPage() {
         scroll="paper"
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
+        sx={{ 
+          '& .MuiDialog-container': {
+            '& .MuiPaper-root': {
+              backgroundColor: isDarkMode ? '#212121' : '#f5f5f5', // Match the background color with the theme
+              borderRadius: '20px', // Rounded corners for the dialog
+              boxShadow: '5px 5px 20px rgba(0, 0, 0, 0.2)', // Add a shadow for visual depth
+            },
+            '& .MuiDialogContent-root': {
+              padding: '16px', // Reduced padding to 16px
+              color: isDarkMode ? '#fff' : '#000', // Set text color based on theme
+            },
+            '& .MuiDialogTitle-root': {
+              padding: '5px 10px', // Reduced padding to 5px 10px
+              textAlign: 'center', // Center the title
+              color: isDarkMode ? '#90caf9' : '#1976d2', // Set title color based on theme
+            },
+            '& .MuiDialogActions-root': {
+              padding: '5px 10px', // Reduced padding to 5px 10px
+              justifyContent: 'center', // Center the buttons
+            },
+          },
+          '& .MuiTypography-h6': {
+            color: isDarkMode ? '#90caf9' : '#1976d2', // Title color based on the theme
+            fontWeight: 'bold', // Make the title bold
+          },
+          '& .MuiButton-root': {
+            padding: '8px 15px', // Reduced padding to 8px 15px
+            borderRadius: '20px', // Rounded corners for buttons
+            fontSize: '0.7rem', // Reduced font size
+            color: isDarkMode ? '#fff' : '#000', // Set button text color based on theme
+            '&:hover': {
+              backgroundColor: isDarkMode ? '#444' : '#e0e0e0', // Hover effect for buttons
+            },
+          },
+          '& .MuiDialogContent-root': {
+            overflow: 'auto', // Enable scrolling for the dialog content if needed
+          }
+        }} // Use sx prop for the dialog styling
       >
-        <DialogTitle id="scroll-dialog-title">Full Content</DialogTitle>
+        <DialogTitle id="scroll-dialog-title">Full Details</DialogTitle>
         <DialogContent dividers={true}>
           <Typography>
             {selectedContent?.page_content}
